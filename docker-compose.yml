@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: golfclub
+      MYSQL_USER: golfuser
+      MYSQL_PASSWORD: golfpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306"
+    volumes:
+      - golf_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: golfclub
+      DB_USERNAME: golfuser
+      DB_PASSWORD: golfpass
+    ports:
+      - "2026:8080"
+
+volumes:
+    golf_db_data:
